@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Podcast Clax · Ação de API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0E2219;--bg2:#132C21;--line:#26473A;--gold:#C9A15A;--gold-soft:#E4C78A;--ivory:#F2ECDD;--muted:#A3B2A8;--dim:#5F7A6C;--track:#0B1A13;--bad:#E9A48F;
+  --serif:'Merriweather',Georgia,serif;--sans:'Manrope',system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(120% 50% at 50% 0%,#16362A 0%,var(--bg) 55%) fixed,var(--bg);color:var(--ivory);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 32px 48px;display:grid;gap:32px}
+@media (max-width:640px){.wrap{padding:28px 16px 36px;gap:26px}}
+header{display:grid;gap:8px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.brand{font-family:var(--serif);font-weight:700;letter-spacing:.16em;color:var(--gold);font-size:16px;display:flex;align-items:center;gap:6px}
+.brand svg{width:13px;height:13px}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(26px,4vw,38px);line-height:1.15;margin-top:8px}
+.sub{color:var(--muted);font-size:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.live{display:inline-flex;align-items:center;gap:6px;color:var(--ivory);font-weight:600}
+.live i{width:8px;height:8px;border-radius:50%;background:#7CC59A;box-shadow:0 0 0 0 rgba(124,197,154,.6);animation:pulse 2s infinite}
+.live.off i{background:var(--bad);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(124,197,154,.55)}70%{box-shadow:0 0 0 8px rgba(124,197,154,0)}100%{box-shadow:0 0 0 0 rgba(124,197,154,0)}}
+@media (prefers-reduced-motion:reduce){.live i{animation:none}}
+h2{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:24px}
+.funnel{display:grid;gap:16px}
+.step{display:grid;grid-template-columns:minmax(150px,200px) 1fr 70px;align-items:center;gap:16px}
+.step .k{font-size:15px}
+.step .k small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.track{height:14px;border-radius:7px;background:var(--track);overflow:hidden}
+.fill{height:100%;width:0;border-radius:7px;background:var(--gold);transition:width .8s cubic-bezier(.2,.7,.2,1)}
+.step.soft .fill{background:var(--gold-soft)}
+.n{font-family:var(--serif);font-size:28px;color:var(--gold-soft);text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.step{grid-template-columns:1fr auto}.step .track{grid-column:1/-1;grid-row:2}}
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}
+.goal{display:grid;gap:12px}
+.goal h3{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big{font-family:var(--serif);font-size:clamp(38px,5vw,50px);line-height:1;color:var(--gold);font-variant-numeric:tabular-nums}
+.of{color:var(--muted);font-size:14px}.of b{color:var(--ivory);font-weight:600}
+.pct{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.err{display:none;border:1px solid #7A4A3C;color:var(--bad);border-radius:12px;padding:12px 16px;font-size:14px}
+footer{color:var(--dim);font-size:12px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">CLAXCLUB <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c.6 6.4 5.6 11.4 12 12-6.4.6-11.4 5.6-12 12-.6-6.4-5.6-11.4-12-12C6.4 11.4 11.4 6.4 12 0z"/></svg></div>
+    <h1>Podcast · Ação de API</h1>
+    <div class="sub"><span class="live" id="live"><i></i>Ao vivo</span><span id="hora">Carregando…</span></div>
+  </header>
+
+  <div class="err" id="erro"></div>
+
+  <section>
+    <h2>Funil do disparo</h2>
+    <div class="card funnel">
+      <div class="step"><div class="k">Leads disparados</div><div class="track"><div class="fill" data-bar="Leads Disparados"></div></div><div class="n" data-qtd="Leads Disparados">—</div></div>
+      <div class="step"><div class="k">Interessados<small><span data-pct="Interessados">—</span> dos disparados</small></div><div class="track"><div class="fill" data-bar="Interessados"></div></div><div class="n" data-qtd="Interessados">—</div></div>
+      <div class="step soft"><div class="k">Leads confirmados<small><span data-pct="Leads Confirmados">—</span> dos disparados</small></div><div class="track"><div class="fill" data-bar="Leads Confirmados"></div></div><div class="n" data-qtd="Leads Confirmados">—</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Metas de confirmados</h2>
+    <div class="goals">
+      <div class="card goal"><h3>Leads</h3><div class="row"><span class="big" data-qtd="Confirmados - Leads">—</span><span class="of">de <b data-qtd="Meta - Leads Confirmados">—</b></span></div><div class="track"><div class="fill" data-meta="Confirmados - Leads"></div></div><div class="pct"><span data-pct="Confirmados - Leads">—</span> da meta</div></div>
+      <div class="card goal"><h3>Sócios</h3><div class="row"><span class="big" data-qtd="Confirmados - Sócios">—</span><span class="of">de <b data-qtd="Meta - Sócios">—</b></span></div><div class="track"><div class="fill" data-meta="Confirmados - Sócios"></div></div><div class="pct"><span data-pct="Confirmados - Sócios">—</span> da meta</div></div>
+      <div class="card goal"><h3>Indicados</h3><div class="row"><span class="big" data-qtd="Confirmados - Indicados">—</span><span class="of">de <b data-qtd="Meta - Indicados">—</b></span></div><div class="track"><div class="fill" data-meta="Confirmados - Indicados"></div></div><div class="pct"><span data-pct="Confirmados - Indicados">—</span> da meta</div></div>
+    </div>
+  </section>
+
+  <footer>Fonte: planilha CLAXCLUB - INTERESSADOS - PODCAST, aba "Dados - API". Atualiza sozinho a cada 1 minuto.</footer>
+</div>
+<script>
+(function(){
+  const fmtN = (n) => n == null ? '—' : n.toLocaleString('pt-BR');
+  const fmtP = (v) => v == null ? '—' : (v * 100).toFixed(1).replace('.', ',') + '%';
+  const $$ = (s) => document.querySelectorAll(s);
+  async function carregar(){
+    try{
+      const r = await fetch('/api/dados', {cache:'no-store'});
+      const j = await r.json();
+      if(!r.ok) throw new Error(j.erro || 'Erro ao ler a planilha');
+      const d = j.dados || {};
+      const disp = d['Leads Disparados'] && d['Leads Disparados'].qtd;
+      $$('[data-qtd]').forEach(el => { const x = d[el.dataset.qtd]; el.textContent = fmtN(x && x.qtd); });
+      $$('[data-pct]').forEach(el => { const x = d[el.dataset.pct]; el.textContent = fmtP(x && x.conversao); });
+      $$('[data-bar]').forEach(el => { const x = d[el.dataset.bar]; el.style.width = (x && x.qtd != null && disp) ? Math.min(100, x.qtd / disp * 100) + '%' : '0'; });
+      $$('[data-meta]').forEach(el => { const x = d[el.dataset.meta]; el.style.width = (x && x.conversao != null) ? Math.min(100, x.conversao * 100) + '%' : '0'; });
+      document.getElementById('hora').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+      document.getElementById('live').classList.remove('off');
+      document.getElementById('erro').style.display = 'none';
+    }catch(e){
+      document.getElementById('live').classList.add('off');
+      const b = document.getElementById('erro'); b.textContent = 'Não consegui ler a planilha agora (' + e.message + '). Tento de novo em 1 minuto.'; b.style.display = 'block';
+    }
+  }
+  carregar(); setInterval(carregar, 60000);
+})();
+</script>
+</body>
+</html>
