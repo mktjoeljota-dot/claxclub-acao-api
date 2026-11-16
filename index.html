@@ -37,7 +37,10 @@ h2{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
 @media (max-width:560px){.step{grid-template-columns:1fr auto}.step .track{grid-column:1/-1;grid-row:2}}
 .goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}
 .goal{display:grid;gap:12px}
-.goals4{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+.goals4{grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr))}
+.goals4 .goal h3{min-height:2.8em}
+.goals-metas{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+.goal.total{border-color:var(--gold)}
 .goal h3{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
 .row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .big{font-family:var(--serif);font-size:clamp(38px,5vw,50px);line-height:1;color:var(--gold);font-variant-numeric:tabular-nums}
@@ -72,16 +75,18 @@ footer{color:var(--dim);font-size:12px;border-top:1px solid var(--line);padding-
       <div class="card goal"><h3>Em follow-up</h3><div class="row"><span class="big" data-qtd="Em follow-up">—</span></div><div class="track"><div class="fill" data-att="Em follow-up"></div></div><div class="pct"><span data-attpct="Em follow-up">—</span> dos interessados</div></div>
       <div class="card goal"><h3>Não é empresário</h3><div class="row"><span class="big" data-qtd="Não é empresário">—</span></div><div class="track"><div class="fill" data-att="Não é empresário"></div></div><div class="pct"><span data-attpct="Não é empresário">—</span> dos interessados</div></div>
       <div class="card goal"><h3>Sem faturamento</h3><div class="row"><span class="big" data-qtd="Sem faturamento">—</span></div><div class="track"><div class="fill" data-att="Sem faturamento"></div></div><div class="pct"><span data-attpct="Sem faturamento">—</span> dos interessados</div></div>
-      <div class="card goal"><h3>Não respondeu mais</h3><div class="row"><span class="big" data-qtd="Não respondeu mais">—</span></div><div class="track"><div class="fill" data-att="Não respondeu mais"></div></div><div class="pct"><span data-attpct="Não respondeu mais">—</span> dos interessados</div></div>
+      <div class="card goal"><h3>Não abriu conversa</h3><div class="row"><span class="big" data-qtd="Não abriu conversa">—</span></div><div class="track"><div class="fill" data-att="Não abriu conversa"></div></div><div class="pct"><span data-attpct="Não abriu conversa">—</span> dos interessados</div></div>
+      <div class="card goal"><h3>Descartados</h3><div class="row"><span class="big" data-qtd="Descartados">—</span></div><div class="track"><div class="fill" data-att="Descartados"></div></div><div class="pct"><span data-attpct="Descartados">—</span> dos interessados</div></div>
     </div>
   </section>
 
   <section>
     <h2>Metas de confirmados</h2>
-    <div class="goals">
+    <div class="goals goals-metas">
       <div class="card goal"><h3>Leads</h3><div class="row"><span class="big" data-qtd="Confirmados - Leads">—</span><span class="of">de <b data-qtd="Meta - Leads Confirmados">—</b></span></div><div class="track"><div class="fill" data-meta="Confirmados - Leads"></div></div><div class="pct"><span data-pct="Confirmados - Leads">—</span> da meta</div></div>
       <div class="card goal"><h3>Sócios</h3><div class="row"><span class="big" data-qtd="Confirmados - Sócios">—</span><span class="of">de <b data-qtd="Meta - Sócios">—</b></span></div><div class="track"><div class="fill" data-meta="Confirmados - Sócios"></div></div><div class="pct"><span data-pct="Confirmados - Sócios">—</span> da meta</div></div>
       <div class="card goal"><h3>Indicados</h3><div class="row"><span class="big" data-qtd="Confirmados - Indicados">—</span><span class="of">de <b data-qtd="Meta - Indicados">—</b></span></div><div class="track"><div class="fill" data-meta="Confirmados - Indicados"></div></div><div class="pct"><span data-pct="Confirmados - Indicados">—</span> da meta</div></div>
+      <div class="card goal total"><h3>Total confirmados</h3><div class="row"><span class="big" id="tot-qtd">—</span><span class="of">de <b id="tot-meta">—</b></span></div><div class="track"><div class="fill" id="tot-bar"></div></div><div class="pct"><span id="tot-pct">—</span> da meta</div></div>
     </div>
   </section>
 
@@ -110,6 +115,16 @@ footer{color:var(--dim);font-size:12px;border-top:1px solid var(--line);padding-
       $$('[data-att]').forEach(el => { const p = pctAtt(d[el.dataset.att]); el.style.width = p != null ? Math.min(100, p * 100) + '%' : '0'; });
       $$('[data-attpct]').forEach(el => { el.textContent = fmtP(pctAtt(d[el.dataset.attpct])); });
       $$('[data-meta]').forEach(el => { const x = d[el.dataset.meta]; el.style.width = (x && x.conversao != null) ? Math.min(100, x.conversao * 100) + '%' : '0'; });
+      const num = (k) => { const x = d[k]; return x && x.qtd != null ? Number(x.qtd) : null; };
+      const conf = ['Confirmados - Leads','Confirmados - Sócios','Confirmados - Indicados'].map(num);
+      const metas = ['Meta - Leads Confirmados','Meta - Sócios','Meta - Indicados'].map(num);
+      const tq = conf.every(v => v == null) ? null : conf.reduce((a, v) => a + (v || 0), 0);
+      const tm = metas.every(v => v == null) ? null : metas.reduce((a, v) => a + (v || 0), 0);
+      const tp = (tq != null && tm) ? tq / tm : null;
+      document.getElementById('tot-qtd').textContent = fmtN(tq);
+      document.getElementById('tot-meta').textContent = fmtN(tm);
+      document.getElementById('tot-pct').textContent = fmtP(tp);
+      document.getElementById('tot-bar').style.width = tp != null ? Math.min(100, tp * 100) + '%' : '0';
       document.getElementById('hora').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
       document.getElementById('live').classList.remove('off');
       document.getElementById('erro').style.display = 'none';
